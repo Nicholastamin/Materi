@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#111827">
+<title>Materi Sekolah</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root{--bg:#f4f7fb;--card:#fff;--text:#172033;--muted:#667085;--primary:#2563eb;--primary2:#1d4ed8;--border:#e4e7ec;--danger:#dc2626;--shadow:0 8px 30px rgba(16,24,40,.07)}
+*{box-sizing:border-box}body{margin:0;font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:var(--bg);color:var(--text)}
+button,input,textarea,select{font:inherit}button{cursor:pointer;border:0}.hidden{display:none!important}
+header{position:sticky;top:0;z-index:10;background:rgba(255,255,255,.94);backdrop-filter:blur(12px);border-bottom:1px solid var(--border)}
+.nav{max-width:1200px;margin:auto;padding:14px 18px;display:flex;align-items:center;gap:12px}.brand{font-size:20px;font-weight:800;flex:1}.brand span{color:var(--primary)}
+.container{max-width:1200px;margin:auto;padding:24px 18px 60px}
+.hero{display:flex;gap:16px;align-items:center;justify-content:space-between;margin-bottom:22px}.hero h1{margin:0 0 5px;font-size:30px}.hero p{margin:0;color:var(--muted)}
+.btn{padding:10px 15px;border-radius:10px;background:var(--primary);color:#fff;font-weight:700}.btn:hover{background:var(--primary2)}.btn.secondary{background:#eef2ff;color:#1e40af}.btn.danger{background:#fee2e2;color:#b91c1c}.btn.ghost{background:#fff;color:var(--text);border:1px solid var(--border)}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:15px}.card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:18px;box-shadow:var(--shadow)}.subject-card{min-height:150px;display:flex;flex-direction:column;justify-content:space-between}.subject-icon{font-size:30px}.card h3{margin:9px 0 5px}.muted{color:var(--muted);font-size:14px}
+.search{width:100%;padding:13px 15px;border:1px solid var(--border);border-radius:12px;background:#fff;outline:none}.search:focus,input:focus,textarea:focus,select:focus{border-color:var(--primary);box-shadow:0 0 0 3px rgba(37,99,235,.1)}
+.toolbar{display:flex;gap:10px;align-items:center;margin-bottom:18px}.toolbar .search{flex:1}
+.back{margin-bottom:18px}.breadcrumb{color:var(--muted);font-size:14px;margin-bottom:7px}.material-card{display:flex;gap:14px;align-items:center}.material-card .emoji{font-size:28px}
+.modal{position:fixed;inset:0;background:rgba(15,23,42,.55);display:flex;align-items:center;justify-content:center;padding:18px;z-index:30}.modal-box{background:#fff;border-radius:18px;width:min(680px,100%);max-height:92vh;overflow:auto;padding:22px}.modal-box h2{margin-top:0}.form-group{margin-bottom:14px}.form-group label{display:block;font-weight:700;margin-bottom:7px}.form-group input,.form-group textarea,.form-group select{width:100%;padding:11px 12px;border:1px solid var(--border);border-radius:10px;background:#fff}.form-group textarea{min-height:120px;resize:vertical}.actions{display:flex;justify-content:flex-end;gap:9px;margin-top:18px;flex-wrap:wrap}
+.block{background:#fff;border:1px solid var(--border);border-radius:16px;padding:18px;margin-bottom:14px}.block h3{margin-top:0}.block img{max-width:100%;border-radius:12px;display:block}.block video{width:100%;max-height:600px;border-radius:12px;background:#000}.file-link{display:inline-flex;gap:8px;align-items:center;padding:11px 14px;border:1px solid var(--border);border-radius:10px;text-decoration:none;color:var(--primary);font-weight:700}
+.auth-wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px}.auth-card{width:min(440px,100%);background:#fff;border:1px solid var(--border);border-radius:20px;padding:26px;box-shadow:var(--shadow)}.auth-card h1{margin-top:0}.error{color:#b91c1c;background:#fef2f2;padding:10px;border-radius:9px;font-size:14px;margin-bottom:12px}.success{color:#166534;background:#f0fdf4;padding:10px;border-radius:9px;font-size:14px;margin-bottom:12px}
+.empty{padding:45px 15px;text-align:center;color:var(--muted);background:#fff;border:1px dashed var(--border);border-radius:16px}.small{font-size:12px;color:var(--muted)}.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+@media(max-width:650px){.hero{align-items:flex-start;flex-direction:column}.hero h1{font-size:25px}.container{padding:18px 12px 50px}.nav{padding:12px}.grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.card{padding:14px}.btn{padding:9px 12px}.toolbar{flex-direction:column;align-items:stretch}}
+</style>
+</head>
+<body>
+<div id="authView" class="auth-wrap">
+  <div class="auth-card">
+    <h1>📚 Materi Sekolah</h1>
+    <p class="muted">Simpan semua materi sekolah secara online.</p>
+    <div id="authMessage"></div>
+    <div class="form-group"><label>Email</label><input id="authEmail" type="email" autocomplete="email" placeholder="email kamu"></div>
+    <div class="form-group"><label>Password</label><input id="authPassword" type="password" autocomplete="current-password" placeholder="minimal 6 karakter"></div>
+    <div class="actions" style="justify-content:stretch">
+      <button class="btn" style="flex:1" onclick="login()">Masuk</button>
+      <button class="btn secondary" style="flex:1" onclick="signup()">Daftar</button>
+    </div>
+    <p class="small" style="margin-top:15px">Gunakan akun sendiri. Jangan membagikan password.</p>
+  </div>
+</div>
+
+<div id="appView" class="hidden">
+<header><div class="nav"><div class="brand">📚 <span>Materi</span> Sekolah</div><span id="userEmail" class="small"></span><button class="btn ghost" onclick="logout()">Keluar</button></div></header>
+<main class="container">
+  <section id="homePage">
+    <div class="hero"><div><h1>Materi Sekolah</h1><p>Semua mata pelajaran dan materi kamu di satu tempat.</p></div><button class="btn" onclick="openSubjectModal()">＋ Mata Pelajaran</button></div>
+    <div class="toolbar"><input id="subjectSearch" class="search" placeholder="🔎 Cari mata pelajaran..." oninput="renderSubjects()"></div>
+    <div id="subjectGrid" class="grid"></div>
+  </section>
+
+  <section id="subjectPage" class="hidden">
+    <div class="back"><button class="btn ghost" onclick="goHome()">← Kembali</button></div>
+    <div class="hero"><div><div id="subjectCrumb" class="breadcrumb"></div><h1 id="subjectTitle"></h1><p id="subjectDesc"></p></div><button class="btn" onclick="openMaterialModal()">＋ Materi</button></div>
+    <div class="toolbar"><input id="materialSearch" class="search" placeholder="🔎 Cari materi..." oninput="renderMaterials()"></div>
+    <div id="materialGrid" class="grid"></div>
+  </section>
+
+  <section id="materialPage" class="hidden">
+    <div class="back"><button class="btn ghost" onclick="goSubject()">← Kembali</button></div>
+    <div class="hero"><div><div id="materialCrumb" class="breadcrumb"></div><h1 id="materialTitle"></h1><p id="materialDate"></p></div><div class="row"><button class="btn secondary" onclick="openBlockModal()">＋ Konten</button><button class="btn danger" onclick="deleteMaterial()">Hapus</button></div></div>
+    <div id="blockList"></div>
+  </section>
+</main>
+</div>
+
+<div id="modal" class="modal hidden" onclick="if(event.target===this)closeModal()"><div class="modal-box" id="modalBox"></div></div>
+
+<script>
+const SUPABASE_URL = "PASTE_SUPABASE_URL_HERE";
+const SUPABASE_KEY = "PASTE_SUPABASE_PUBLISHABLE_OR_ANON_KEY_HERE";
+const BUCKET = "materi-files";
+const { createClient } = supabase;
+const db = createClient(SUPABASE_URL, SUPABASE_KEY);
+
+let user = null, subjects = [], materials = [], blocks = [];
+let currentSubject = null, currentMaterial = null;
+
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]));
+const fmtDate = s => new Date(s).toLocaleDateString("id-ID",{day:"numeric",month:"long",year:"numeric"});
+
+async function init(){
+  if(SUPABASE_URL.includes("PASTE_")) {
+    showAuthMsg("Masukkan SUPABASE_URL dan SUPABASE_KEY di bagian konfigurasi kode.", true);
+    return;
+  }
+  const {data:{session}} = await db.auth.getSession();
+  if(session) showApp(session.user); else showAuth();
+  db.auth.onAuthStateChange((_event, session)=> session ? showApp(session.user) : showAuth());
+}
+function showAuth(){ $("authView").classList.remove("hidden"); $("appView").classList.add("hidden"); }
+function showApp(u){ user=u; $("authView").classList.add("hidden"); $("appView").classList.remove("hidden"); $("userEmail").textContent=u.email||""; loadSubjects(); }
+function showAuthMsg(msg,error=false){ $("authMessage").innerHTML=`<div class="${error?'error':'success'}">${esc(msg)}</div>`; }
+async function login(){
+  const email=$("authEmail").value.trim(), password=$("authPassword").value;
+  if(!email||!password)return showAuthMsg("Isi email dan password.",true);
+  const {error}=await db.auth.signInWithPassword({email,password});
+  if(error)showAuthMsg(error.message,true);
+}
+async function signup(){
+  const email=$("authEmail").value.trim(), password=$("authPassword").value;
+  if(!email||password.length<6)return showAuthMsg("Email harus diisi dan password minimal 6 karakter.",true);
+  const {error}=await db.auth.signUp({email,password});
+  if(error)showAuthMsg(error.message,true); else showAuthMsg("Akun dibuat. Jika verifikasi email aktif, cek email kamu.");
+}
+async function logout(){await db.auth.signOut();}
+
+function only(page){["homePage","subjectPage","materialPage"].forEach(x=>$(x).classList.toggle("hidden",x!==page));}
+async function loadSubjects(){
+  const {data,error}=await db.from("subjects").select("*").order("name");
+  if(error)return toast(error.message,true);
+  subjects=data||[]; renderSubjects();
+}
+function renderSubjects(){
+  const q=($("subjectSearch").value||"").toLowerCase();
+  const list=subjects.filter(s=>s.name.toLowerCase().includes(q));
+  $("subjectGrid").innerHTML=list.length?list.map(s=>`
+    <div class="card subject-card">
+      <div><div class="subject-icon">📘</div><h3>${esc(s.name)}</h3><div class="muted">${esc(s.description||"Belum ada deskripsi")}</div></div>
+      <div class="row" style="justify-content:space-between;margin-top:14px"><button class="btn" onclick="openSubject('${s.id}')">Buka</button><button class="btn ghost" onclick="editSubject('${s.id}')">Edit</button></div>
+    </div>`).join(""):`<div class="empty" style="grid-column:1/-1">Belum ada mata pelajaran.<br>Tekan <b>＋ Mata Pelajaran</b> untuk mulai.</div>`;
+}
+function openSubject(id){currentSubject=subjects.find(s=>s.id===id); if(!currentSubject)return; $("subjectTitle").textContent=currentSubject.name;$("subjectDesc").textContent=currentSubject.description||"";$("subjectCrumb").textContent="Mata Pelajaran";$("materialSearch").value="";only("subjectPage");loadMaterials();}
+async function loadMaterials(){
+  const {data,error}=await db.from("materials").select("*").eq("subject_id",currentSubject.id).order("created_at",{ascending:false});
+  if(error)return toast(error.message,true);materials=data||[];renderMaterials();
+}
+function renderMaterials(){
+  const q=($("materialSearch").value||"").toLowerCase();
+  const list=materials.filter(m=>(m.title+" "+(m.description||"")).toLowerCase().includes(q));
+  $("materialGrid").innerHTML=list.length?list.map(m=>`
+    <div class="card material-card"><div class="emoji">📝</div><div style="flex:1"><h3>${esc(m.title)}</h3><div class="muted">${esc(m.description||"")}</div><div class="small">${fmtDate(m.created_at)}</div></div><button class="btn" onclick="openMaterial('${m.id}')">Buka</button></div>`).join(""):`<div class="empty" style="grid-column:1/-1">Belum ada materi di ${esc(currentSubject.name)}.</div>`;
+}
+async function openMaterial(id){currentMaterial=materials.find(m=>m.id===id);if(!currentMaterial)return;$("materialTitle").textContent=currentMaterial.title;$("materialDate").textContent=fmtDate(currentMaterial.created_at);$("materialCrumb").textContent=currentSubject.name;only("materialPage");await loadBlocks();}
+async function loadBlocks(){
+  const {data,error}=await db.from("content_blocks").select("*").eq("material_id",currentMaterial.id).order("position");
+  if(error)return toast(error.message,true);blocks=data||[];await renderBlocks();
+}
+async function renderBlocks(){
+  const out=[];
+  for(const b of blocks){
+    let body="";
+    if(b.type==="text")body=`<div style="white-space:pre-wrap;line-height:1.7">${esc(b.content)}</div>`;
+    if(b.type==="link")body=`<a class="file-link" href="${esc(b.content)}" target="_blank" rel="noopener">🔗 Buka tautan</a>`;
+    if(["image","video","file"].includes(b.type) && b.file_path){
+      const {data,error}=await db.storage.from(BUCKET).createSignedUrl(b.file_path,3600);
+      if(error) body=`<div class="error">File tidak dapat dibuka: ${esc(error.message)}</div>`;
+      else if(b.type==="image")body=`<img src="${data.signedUrl}" alt="${esc(b.title||"gambar")}">`;
+      else if(b.type==="video")body=`<video src="${data.signedUrl}" controls playsinline></video>`;
+      else body=`<a class="file-link" href="${data.signedUrl}" target="_blank" rel="noopener">📄 ${esc(b.title||"Buka file")}</a>`;
+    }
+    out.push(`<article class="block"><div class="row" style="justify-content:space-between"><h3>${esc(b.title||({text:"Teks",image:"Gambar",video:"Video",file:"File",link:"Tautan"}[b.type]))}</h3><button class="btn danger" onclick="deleteBlock('${b.id}')">Hapus</button></div>${body}</article>`);
+  }
+  $("blockList").innerHTML=out.length?out.join(""):`<div class="empty">Materi ini belum memiliki konten.<br>Tekan <b>＋ Konten</b> untuk menambahkan teks, gambar, video, file, atau tautan.</div>`;
+}
+
+function openSubjectModal(edit=null){
+  const s=edit||{};
+  $("modalBox").innerHTML=`<h2>${edit?"Edit":"Tambah"} Mata Pelajaran</h2>
+  <div class="form-group"><label>Nama mata pelajaran</label><input id="fName" value="${esc(s.name||"")}" placeholder="Contoh: Kimia"></div>
+  <div class="form-group"><label>Deskripsi (opsional)</label><textarea id="fDesc" placeholder="Contoh: Materi kelas 12">${esc(s.description||"")}</textarea></div>
+  <div class="actions"><button class="btn ghost" onclick="closeModal()">Batal</button><button class="btn" onclick="${edit?`saveSubject('${edit.id}')`:"saveSubject()"}">Simpan</button></div>`;
+  $("modal").classList.remove("hidden");
+}
+function editSubject(id){const s=subjects.find(x=>x.id===id);openSubjectModal(s)}
+async function saveSubject(id=null){
+  const name=$("fName").value.trim(), description=$("fDesc").value.trim();
+  if(!name)return toast("Nama mata pelajaran wajib diisi.",true);
+  const payload={name,description,user_id:user.id};
+  const res=id?await db.from("subjects").update(payload).eq("id",id).eq("user_id",user.id):await db.from("subjects").insert(payload);
+  if(res.error)return toast(res.error.message,true);closeModal();await loadSubjects();
+}
+function openMaterialModal(){
+  $("modalBox").innerHTML=`<h2>Tambah Materi</h2>
+  <div class="form-group"><label>Nama materi</label><input id="fName" placeholder="Contoh: Makromolekul"></div>
+  <div class="form-group"><label>Deskripsi (opsional)</label><textarea id="fDesc" placeholder="Ringkasan singkat"></textarea></div>
+  <div class="actions"><button class="btn ghost" onclick="closeModal()">Batal</button><button class="btn" onclick="saveMaterial()">Simpan</button></div>`;
+  $("modal").classList.remove("hidden");
+}
+async function saveMaterial(){
+  const title=$("fName").value.trim(),description=$("fDesc").value.trim();
+  if(!title)return toast("Nama materi wajib diisi.",true);
+  const {error}=await db.from("materials").insert({title,description,subject_id:currentSubject.id,user_id:user.id});
+  if(error)return toast(error.message,true);closeModal();await loadMaterials();
+}
+function openBlockModal(){
+  $("modalBox").innerHTML=`<h2>Tambah Konten</h2>
+  <div class="form-group"><label>Jenis konten</label><select id="fType" onchange="changeBlockForm()"><option value="text">📝 Teks</option><option value="image">🖼️ Gambar</option><option value="video">🎥 Video</option><option value="file">📄 File</option><option value="link">🔗 Tautan video/web</option></select></div>
+  <div id="blockForm"></div><div class="actions"><button class="btn ghost" onclick="closeModal()">Batal</button><button class="btn" onclick="saveBlock()">Tambahkan</button></div>`;
+  $("modal").classList.remove("hidden");changeBlockForm();
+}
+function changeBlockForm(){
+  const t=$("fType").value;
+  if(t==="text")$("blockForm").innerHTML=`<div class="form-group"><label>Judul</label><input id="fTitle" placeholder="Contoh: Pengertian"></div><div class="form-group"><label>Isi</label><textarea id="fContent" placeholder="Tulis materi di sini..."></textarea></div>`;
+  else if(t==="link")$("blockForm").innerHTML=`<div class="form-group"><label>Judul</label><input id="fTitle" placeholder="Contoh: Video pembelajaran"></div><div class="form-group"><label>URL</label><input id="fUrl" type="url" placeholder="https://..."></div>`;
+  else $("blockForm").innerHTML=`<div class="form-group"><label>Judul</label><input id="fTitle" placeholder="Nama file/konten"></div><div class="form-group"><label>Pilih file</label><input id="fFile" type="file" ${t==="image"?"accept=\"image/*\"":t==="video"?"accept=\"video/*\"":""}></div><div class="small">Untuk upload besar, koneksi stabil lebih disarankan. Maksimum versi ini: 50 MB per file.</div>`;
+}
+async function saveBlock(){
+  const type=$("fType").value,title=$("fTitle").value.trim();
+  if(!title)return toast("Judul wajib diisi.",true);
+  if(type==="text"){
+    const content=$("fContent").value;
+    if(!content.trim())return toast("Isi teks masih kosong.",true);
+    const {error}=await db.from("content_blocks").insert({material_id:currentMaterial.id,user_id:user.id,type,title,content,position:blocks.length});
+    if(error)return toast(error.message,true);
+  } else if(type==="link"){
+    const content=$("fUrl").value.trim();
+    if(!/^https?:\/\//i.test(content))return toast("URL harus diawali http:// atau https://",true);
+    const {error}=await db.from("content_blocks").insert({material_id:currentMaterial.id,user_id:user.id,type,title,content,position:blocks.length});
+    if(error)return toast(error.message,true);
+  } else {
+    const file=$("fFile").files[0];
+    if(!file)return toast("Pilih file terlebih dahulu.",true);
+    if(file.size>50*1024*1024)return toast("File maksimal 50 MB pada versi ini.",true);
+    const safe=file.name.replace(/[^a-zA-Z0-9._-]/g,"_");
+    const path=`${user.id}/${crypto.randomUUID()}-${safe}`;
+    const {error:upErr}=await db.storage.from(BUCKET).upload(path,file,{contentType:file.type,upsert:false});
+    if(upErr)return toast(upErr.message,true);
+    const {error}=await db.from("content_blocks").insert({material_id:currentMaterial.id,user_id:user.id,type,title,file_path:path,file_name:file.name,file_size:file.size,position:blocks.length});
+    if(error){await db.storage.from(BUCKET).remove([path]);return toast(error.message,true);}
+  }
+  closeModal();await loadBlocks();
+}
+async function deleteBlock(id){
+  if(!confirm("Hapus konten ini?"))return;
+  const b=blocks.find(x=>x.id===id);
+  const {error}=await db.from("content_blocks").delete().eq("id",id).eq("user_id",user.id);
+  if(error)return toast(error.message,true);
+  if(b?.file_path)await db.storage.from(BUCKET).remove([b.file_path]);
+  await loadBlocks();
+}
+async function deleteMaterial(){
+  if(!confirm("Hapus materi ini beserta semua kontennya?"))return;
+  for(const b of blocks)if(b.file_path)await db.storage.from(BUCKET).remove([b.file_path]);
+  const {error}=await db.from("materials").delete().eq("id",currentMaterial.id).eq("user_id",user.id);
+  if(error)return toast(error.message,true);
+  await loadMaterials();goSubject();
+}
+function goHome(){currentSubject=null;only("homePage");loadSubjects()}
+function goSubject(){currentMaterial=null;only("subjectPage");loadMaterials()}
+function closeModal(){$("modal").classList.add("hidden")}
+function toast(msg,error=false){alert((error?"❌ ":"✅ ")+msg)}
+init();
+</script>
+</body>
+</html>
